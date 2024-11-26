@@ -138,3 +138,91 @@ print(classification_report(y_test, y_pred))
 
 reviews_df["cleaned_review_text"]
 reviews_df["review_text"]
+
+#####################################################
+import re
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+import nltk
+
+# NLTK bileşenlerini indirme
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('punkt')
+
+
+# Sentiment ifadelerinin korunması
+def preserve_sentiment_phrases(text):
+    # Duygusal ifadeler: olumsuz ve olumlu ifadeleri koruyoruz
+    sentiment_phrases = ['disappointing', 'fantastic', 'not recommend', 'would not recommend', 'unprofessional',
+                         'professional', 'well-maintained', 'would recommend', 'great', 'excellent']
+
+    for phrase in sentiment_phrases:
+        # Bu ifadeleri korumak için metni işaretle (daha sonra geri getirebilmek için)
+        text = re.sub(r'\b' + re.escape(phrase) + r'\b', f" {phrase}_PHRASE ", text, flags=re.IGNORECASE)
+
+    return text
+
+
+# Ön işleme fonksiyonu
+def preprocess_reviews(text):
+    # 1. Sentiment ifadelerini koruma
+    text = preserve_sentiment_phrases(text)
+
+    # 2. Küçük harfe dönüştürme
+    text = text.lower()
+
+    # 3. Noktalama işaretlerini kaldırma
+    text = re.sub(r'[^\w\s]', '', text)
+
+    # 4. Sayıları kaldırma
+    text = re.sub(r'\d+', '', text)
+
+    # 5. Stopwords'leri kaldırma
+    sw = stopwords.words('english')
+    text = " ".join(x for x in text.split() if x not in sw)
+
+    # 6. Rare words (nadiren geçen kelimeler) kaldırma
+    temp_df = pd.Series(' '.join(text).split()).value_counts()
+    drops = temp_df[temp_df <= 1]
+    text = " ".join(x for x in text.split() if x not in drops)
+
+    # 7. Lemmatization (kelimeleri köklerine ayırma)
+    lemmatizer = WordNetLemmatizer()
+    text = " ".join([lemmatizer.lemmatize(word) for word in text.split()])
+
+    # 8. Sentiment ifadelerini geri getirme
+    sentiment_phrases = ['disappointing', 'fantastic', 'not recommend', 'would not recommend', 'unprofessional',
+                         'professional', 'well-maintained', 'would recommend', 'great', 'excellent']
+    for phrase in sentiment_phrases:
+        text = text.replace(f" {phrase}_PHRASE ", phrase)
+
+    return text
+
+
+# Yorumları temizleme
+reviews_df["cleaned_review_text"] = reviews_df["review_text"].apply(preprocess_reviews)
+
+# Şimdi temizlenmiş veriye göz atalım
+print(reviews_df[['review_text', 'cleaned_review_text']].head())
+
+X = reviews_df['cleaned_review_text']
+y = reviews_df['position']
+
+# Eğitim ve test setlerine ayırma
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+# TF-IDF dönüşümü
+tfidf_vectorizer = TfidfVectorizer(ngram_range=(1, 2), stop_words='english')
+X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
+X_test_tfidf = tfidf_vectorizer.transform(X_test)
+
+# Logistic Regression modeli
+logistic_model = LogisticRegression()
+logistic_model.fit(X_train_tfidf, y_train)
+
+# Tahmin
+y_pred = logistic_model.predict(X_test_tfidf)
+
+# Performans değerlendirme
+print(classification_report(y_test, y_pred))
