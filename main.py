@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg')
 pd.set_option('display.max_columns', None)
+pd.set_option('display.max_colwidth', None)
 pd.set_option('display.width', 500)
 def check_df(dataframe, head=5):
     print("##################### Shape #####################")
@@ -87,7 +88,6 @@ def preprocess_reviews(text):
     # öncelikle cümleleri boşluklara göre split edip list comp yapısıyla kelimelerin hepsini gezip stopwords olmayanları seçelim, seçtiklerimizi tekrar join ile birleştirelim
     text = " ".join(x for x in text.split() if x not in sw)
 
-
     # Rarewords -> nadir geçen kelimeler
     # nadir geçen kelimeleri çıkarmak için kelimelerin frekansını hesaplayıp kaç kere geçtiğini hesaplamalıyız
     temp_df = pd.Series(' '.join(text).split()).value_counts()
@@ -106,3 +106,35 @@ def preprocess_reviews(text):
 reviews_df["cleaned_review_text"] = reviews_df["review_text"].apply(preprocess_reviews)
 reviews_df.columns
 reviews_df[['review_text', 'cleaned_review_text']].head()
+
+
+# tf-idf uygulayalım
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report
+
+# Özellikler ve etiketler
+X = reviews_df['cleaned_review_text']
+y = reviews_df['position']
+
+# Eğitim ve test setlerine ayırma
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+# TF-IDF dönüşümü
+tfidf_vectorizer = TfidfVectorizer(ngram_range=(1, 2), stop_words='english')
+X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
+X_test_tfidf = tfidf_vectorizer.transform(X_test)
+
+# Logistic Regression modeli
+logistic_model = LogisticRegression()
+logistic_model.fit(X_train_tfidf, y_train)
+
+# Tahmin
+y_pred = logistic_model.predict(X_test_tfidf)
+
+# Performans değerlendirme
+print(classification_report(y_test, y_pred))
+
+reviews_df["cleaned_review_text"]
+reviews_df["review_text"]
