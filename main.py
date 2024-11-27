@@ -44,6 +44,7 @@ reviews_df.info()
 services_df.info()
 summary_df.info()
 reviews_df["position"].unique()
+reviews_df["review_text"].nunique()
 reviews_df["review_text"].head()
 position = reviews_df['position'].value_counts()
 
