@@ -1,11 +1,11 @@
-﻿service_id,summary_text
-968,General feedback suggests that X-ray Imaging is effective.
-243,General feedback suggests that General Checkup is effective.
-955,General feedback suggests that Blood Test is effective.
-765,General feedback suggests that Vaccination is effective.
-170,General feedback suggests that Physical Therapy is controversial.
-935,General feedback suggests that MRI Scan is controversial.
-442,General feedback suggests that Flu Shot is effective.
-535,General feedback suggests that Dental Cleaning is controversial.
-930,General feedback suggests that Mental Health Counseling is controversial.
-672,General feedback suggests that Chiropractic Adjustment is effective.
+service_id,summary_text
+1,"X-ray Imaging is praised for its efficiency, but occasionally patients report dissatisfaction with staff."
+2,"General Checkup services are considered thorough, but some patients mention long wait times."
+3,Blood Test services are generally appreciated for ease and professional staff.
+4,Flu Shots are effective but some users report discomfort and side effects.
+5,"Physical Therapy is known for positive results, although not everyone finds it beneficial."
+6,"MRI Scans are essential for diagnostics, but some patients feel uncomfortable during the process."
+7,"Flu Shots are necessary for illness prevention, but side effects are a common complaint."
+8,"Dental Cleanings are efficient, but patients sometimes find them uncomfortable."
+9,Mental Health Counseling is effective for many but can be difficult for some to attend regularly.
+10,"Chiropractic Adjustments are beneficial for pain relief, though their effectiveness is debated."

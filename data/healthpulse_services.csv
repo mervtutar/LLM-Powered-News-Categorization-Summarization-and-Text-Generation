@@ -1,11 +1,11 @@
-﻿service_id,service_name,description
-968,X-ray Imaging,Reveal sister test role imagine remember new hard.
-243,General Checkup,Total let central here west company call work word response discover have fact.
-955,Blood Test,Owner happy particularly think stay movie.
-765,Vaccination,Discussion knowledge here assume treatment by.
-170,Physical Therapy,Send cost capital administration leg pull let respond good.
-935,MRI Scan,Boy community accept idea get nature week four young drive mean figure.
-442,Flu Shot,At effort different affect piece chance purpose campaign grow nation operation.
-535,Dental Cleaning,Fast hit role situation television never situation.
-930,Mental Health Counseling,Away carry item author southern green focus plan crime call growth agreement believe.
-672,Chiropractic Adjustment,Director bed debate economic decade treatment painting fight thousand.
+service_id,service_name,description
+1,X-ray Imaging,"X-ray imaging is used to examine bones, organs, and tissues."
+2,General Checkup,A routine checkup to assess overall health and prevent disease.
+3,Blood Test,A diagnostic procedure to analyze blood samples for health conditions.
+4,Vaccination,Immunization to protect against specific diseases.
+5,Physical Therapy,Treatment to improve movement and relieve pain through exercises and techniques.
+6,MRI Scan,A medical imaging technique used to visualize internal structures.
+7,Flu Shot,A vaccination to protect against influenza.
+8,Dental Cleaning,Professional cleaning of teeth to prevent dental issues.
+9,Mental Health Counseling,Therapy to support mental and emotional well-being.
+10,Chiropractic Adjustment,Manual therapy to treat musculoskeletal problems.

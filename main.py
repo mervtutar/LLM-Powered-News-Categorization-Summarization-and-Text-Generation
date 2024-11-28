@@ -43,10 +43,10 @@ check_df(summary_df)
 reviews_df.info()
 services_df.info()
 summary_df.info()
-reviews_df["position"].unique()
+reviews_df["claim_type"].unique()
 reviews_df["review_text"].nunique()
 reviews_df["review_text"].head()
-position = reviews_df['position'].value_counts()
+position = reviews_df['claim_type'].value_counts()
 
 # sercvice_id üzerinden 3 datayı birleştirelim.
 # reviews ile service datasını birleştirelim
@@ -129,7 +129,7 @@ from sklearn.metrics import classification_report
 
 # Özellikler ve etiketler
 X = reviews_df['cleaned_review_text']
-y = reviews_df['position']
+y = reviews_df['claim_type']
 
 # Eğitim ve test setlerine ayırma
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
@@ -150,5 +150,5 @@ y_pred = logistic_model.predict(X_test_tfidf)
 print(classification_report(y_test, y_pred))
 
 reviews_df["cleaned_review_text"]
-reviews_df[["review_text",   "position"]]
+reviews_df[["review_text",   "claim_type"]]
 
