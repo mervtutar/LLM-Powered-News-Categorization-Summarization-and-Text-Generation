@@ -232,3 +232,8 @@ print(classification_report(y_test, y_pred))
 reviews_df["cleaned_review_text"]
 reviews_df[["review_text",   "claim_type"]]
 
+import torch
+print("PyTorch version:", torch.__version__)
+print("CUDA available:", torch.cuda.is_available())
+print("CUDA version:", torch.version.cuda)
+print("cuDNN version:", torch.backends.cudnn.version())
