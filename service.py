@@ -27,7 +27,7 @@ def check_df(dataframe, head=5):
     print(dataframe.describe([0, 0.05, 0.50, 0.95, 0.99, 1]).T)
 
 # müşteri verisi ve satış verisini inceleyelim
-tickets_df = pd.read_csv("data/customer_support_tickets.csv")
+data_df = pd.read_csv("data/all_tickets_processed_improved_v3.csv")
 
 
 check_df(tickets_df)
@@ -38,7 +38,7 @@ tickets_df.info()
 
 
 # sınıflandırma için kullanacağımız sonuçları
-data_df = tickets_df[["Ticket Description", "Ticket Type", "Product Purchased", "Ticket Priority", "Ticket Channel"]]
+#data_df = tickets_df[["Ticket Description", "Ticket Type", "Product Purchased", "Ticket Priority", "Ticket Channel"]]
 data_df.info()
 check_df(data_df) # eksik veri yok
 
@@ -120,9 +120,9 @@ def preprocess_reviews(text):
     return text
 
 
-data_df["cleaned ticket description"] = data_df["Ticket Description"].apply(preprocess_reviews)
+data_df["cleaned Document"] = data_df["Document"].apply(preprocess_reviews)
 data_df.columns
-data_df['cleaned ticket description'].head(10)
+data_df['Document'].head(10)
 #############################################################################################
 data_df.dropna(subset=["Ticket Description"], inplace=True)
 
@@ -135,8 +135,8 @@ data_df["cleaned ticket description"] = data_df["Ticket Description"].apply(clea
 
 
 # Splitting the dataset into train and test sets
-X = data_df["cleaned ticket description"]  # Feature: Text data
-y = data_df["Ticket Type"]  # Target: Ticket type
+X = data_df["Document"]  # Feature: Text data
+y = data_df["Topic_group"]  # Target: Ticket type
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
