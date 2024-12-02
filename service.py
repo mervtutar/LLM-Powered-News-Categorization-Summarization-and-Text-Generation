@@ -27,19 +27,34 @@ def check_df(dataframe, head=5):
     print(dataframe.describe([0, 0.05, 0.50, 0.95, 0.99, 1]).T)
 
 # müşteri verisi ve satış verisini inceleyelim
-data_df = pd.read_csv("data/customer_support_tickets.csv")
+tickets_df = pd.read_csv("data/customer_support_tickets.csv")
 
-print("yorumlar/n")
-check_df(data_df)
 
+check_df(tickets_df)
+tickets_df.info()
+
+# "Ticket Description" -> review textimiz
+# "Ticket Type" -> target olacak
+
+
+# sınıflandırma için kullanacağımız sonuçları
+data_df = tickets_df[["Ticket Description", "Ticket Type", "Product Purchased", "Ticket Priority", "Ticket Channel"]]
 data_df.info()
+check_df(data_df) # eksik veri yok
 
-data_df["claim_type"].unique()
-data_df["claim_type"].nunique()
-data_df["review_text"].head()
-position = data_df['claim_type'].value_counts()
+# Ticket Type ları inceleyelim
+data_df["Ticket Type"].unique()
+data_df["Ticket Type"].nunique()
+
+# Ticket Descriptionları inceleyelim
+data_df["Ticket Description"].head()
+data_df["Ticket Description"].nunique()
+position = data_df['Ticket Description'].value_counts()
 
 
+data_df[["Ticket Description","Ticket Type"]].head()
+data_df['Ticket Type'].value_counts()
+###################################################################
 
 
 # data_df[review_text] için preprocess uygulayalım
@@ -57,6 +72,13 @@ from textblob import Word, TextBlob
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 import nltk
+import re
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
 import re
 
 nltk.download('stopwords')
@@ -98,7 +120,38 @@ def preprocess_reviews(text):
     return text
 
 
-data_df["cleaned_review_text"] = data_df["review_text"].apply(preprocess_reviews)
+data_df["cleaned ticket description"] = data_df["Ticket Description"].apply(preprocess_reviews)
 data_df.columns
-data_df['cleaned_review_text'].head(10)
+data_df['cleaned ticket description'].head(10)
 #############################################################################################
+data_df.dropna(subset=["Ticket Description"], inplace=True)
+
+def clean_text(text):
+    text = text.lower()  # Convert to lowercase
+    text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
+    text = re.sub(r'\d+', '', text)  # Remove numbers
+    return text
+data_df["cleaned ticket description"] = data_df["Ticket Description"].apply(clean_text)
+
+
+# Splitting the dataset into train and test sets
+X = data_df["cleaned ticket description"]  # Feature: Text data
+y = data_df["Ticket Type"]  # Target: Ticket type
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+# Creating a pipeline for TF-IDF and Random Forest Classifier
+pipeline = Pipeline([
+    ("tfidf", TfidfVectorizer(stop_words="english", max_features=5000)),  # TF-IDF for feature extraction
+    ("classifier", RandomForestClassifier(n_estimators=100, random_state=42))  # Random Forest for classification
+])
+
+# Training the model
+pipeline.fit(X_train, y_train)
+
+# Making predictions and evaluating the model
+y_pred = pipeline.predict(X_test)
+report = classification_report(y_test, y_pred)
+
+# Display the classification report
+print(report)
