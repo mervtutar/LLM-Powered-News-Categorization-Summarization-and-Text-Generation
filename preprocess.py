@@ -178,3 +178,125 @@ print(f"Predicted Label: {predicted_label}")
 conclusion = generate_conclusion(predicted_label, new_description, data_df)
 print("Generated Conclusion:")
 print(conclusion)
+
+##################################################################################
+
+import pandas as pd
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report
+
+# Veri setini yükleyelim
+data_df = pd.read_csv("data/all_tickets_processed_improved_v3.csv")
+
+# Basit veri analizi fonksiyonu
+def check_df(dataframe, head=5):
+    print("##################### Shape #####################")
+    print(dataframe.shape)
+    print("##################### Head #####################")
+    print(dataframe.head(head))
+    print("##################### NA #####################")
+    print(dataframe.isnull().sum())
+
+check_df(data_df)
+
+# Metin ön işleme fonksiyonu
+def preprocess_reviews(text):
+    import re
+    from nltk.corpus import stopwords
+    from textblob import Word
+
+    # Lowercase
+    text = text.lower()
+    # Noktalama işaretlerini kaldır
+    text = re.sub(r'[^\w\s]', '', text)
+    # Rakamları kaldır
+    text = re.sub(r'\d+', '', text)
+    # Stopwords temizliği
+    sw = stopwords.words('english')
+    text = " ".join(x for x in text.split() if x not in sw)
+    # Lemmatization
+    text = " ".join([Word(word).lemmatize() for word in text.split()])
+    return text
+
+# Metinleri temizleyelim
+data_df["cleaned Document"] = data_df["Document"].apply(preprocess_reviews)
+
+# Eğitim ve test verilerini ayıralım
+X = data_df["cleaned Document"]
+y = data_df["Topic_group"]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Sınıflandırma pipeline'ı
+pipeline = Pipeline([
+    ("tfidf", TfidfVectorizer(stop_words="english", max_features=5000)),
+    ("classifier", RandomForestClassifier(n_estimators=100, random_state=42))
+])
+
+# Modeli eğitme
+pipeline.fit(X_train, y_train)
+
+# Test verisi üzerinde tahmin yapma
+y_pred = pipeline.predict(X_test)
+print(classification_report(y_test, y_pred))
+
+# Hugging Face GPT-Neo-1.3B modeliyle özetleme
+model_name = "EleutherAI/gpt-neo-1.3B"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name)
+
+# Kullanıcıdan yeni bir şikayet alalım
+new_description = input("Please enter the customer review/complaint: ")
+
+# Random Forest sınıflandırma modeli ile tahmin edilen etiket
+predicted_label = pipeline.predict([new_description])[0]
+print(f"Predicted Label: {predicted_label}")
+
+# Özetleme fonksiyonu
+def generate_conclusion(predicted_label, description, data_df, tokenizer, model, max_token_length=512):
+    """
+    Özet oluşturma fonksiyonu.
+    """
+    # Etiketin ait olduğu sınıfın verilerini filtrele
+    class_descriptions = data_df[data_df['Topic_group'] == predicted_label]['cleaned Document']
+    class_summary = " ".join(class_descriptions)
+
+    # Sınıf özeti için token sınırını uygulama
+    class_summary_tokens = class_summary.split()[:max_token_length]
+    class_summary = " ".join(class_summary_tokens)
+
+    # Model için prompt tasarlama
+    prompt = f"""
+    A new customer complaint has been received: "{description}"
+
+    Based on the classification, the complaint falls under the "{predicted_label}" category.
+
+    Here are some common issues faced by customers in the "{predicted_label}" category:
+    {class_summary}
+
+    Based on this, please generate a conclusion that summarizes the key points of the complaint and suggests actions for improving customer satisfaction.
+    """
+
+    # Tokenize giriş
+    input_ids = tokenizer.encode(prompt, return_tensors="pt", truncation=True, max_length=max_token_length)
+
+    # Uzun metin üretme
+    output = model.generate(
+        input_ids,
+        max_length=1024,
+        min_length=300,
+        do_sample=True,
+        temperature=0.7,
+        no_repeat_ngram_size=2
+    )
+
+    # Çıktıyı çözümle
+    generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
+    return generated_text
+
+# Özet oluşturma
+conclusion = generate_conclusion(predicted_label, new_description, data_df, tokenizer, model)
+print("Generated Conclusion:", conclusion)
