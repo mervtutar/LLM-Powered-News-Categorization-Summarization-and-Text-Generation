@@ -45,7 +45,7 @@ data_df["Topic_group"].nunique()
 data_df["Document"].head()
 data_df["Document"].nunique()
 position = data_df['Document'].value_counts()
-
+data_df['Topic_group'].value_counts()
 
 ###################################################################
 
@@ -304,10 +304,6 @@ def generate_conclusion(predicted_label, description, data_df, max_token_length=
 
     # Hugging Face modeline verilen promptu tasarlıyoruz
     prompt = f"""
-    Customer support tickets are classified into the following types with their respective percentages:
-    - Account Access: 33%
-    - Product Inquiry: 33%
-    - Technical Issue: 34%
 
     A new customer complaint has been received: "{description}"
 
