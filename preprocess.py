@@ -34,13 +34,14 @@ data_df = pd.read_csv("data/all_tickets_processed_improved_v3.csv")
 
 data_df.info()
 check_df(data_df) # eksik veri yok
-data_df.head()
+data_df.head(20)
 # Topic_group ları inceleyelim
 data_df["Topic_group"].unique()
 data_df["Topic_group"].nunique()
 
 # Descriptionları inceleyelim
 data_df["Document"].head()
+data_df["Topic_group"].["Administrative rights"].head()
 data_df["Document"].nunique()
 position = data_df['Document'].value_counts()
 data_df['Topic_group'].value_counts()
