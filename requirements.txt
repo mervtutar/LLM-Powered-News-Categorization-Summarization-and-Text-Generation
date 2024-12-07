@@ -11,4 +11,5 @@ xgboost
 joblib
 transformers
 evaluate
+torch==2.1.0+cpu
 
