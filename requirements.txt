@@ -11,4 +11,4 @@ xgboost
 joblib
 transformers
 evaluate
-torch
+
