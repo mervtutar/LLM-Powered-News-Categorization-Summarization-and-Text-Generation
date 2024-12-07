@@ -3,20 +3,21 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
-from sklearn.ensemble import RandomForestClassifier
 import xgboost as xgb
 import os
 import joblib  # Modeli kaydetmek ve yüklemek için kullanacağız
-from transformers import BartTokenizer, BartForConditionalGeneration, pipeline
+from transformers import BartTokenizer, BartForConditionalGeneration
 from evaluate import load
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.preprocessing import LabelEncoder
+
 # Veri yükleme
 data_df = pd.read_csv('data/merged_data.csv')
 
 # Eğitim ve test verisini ayırma
 X = data_df["cleaned content"]
 y = data_df["category"]
+
 # Label Encoding: Kategorik etiketleri sayısal hale getirme
 label_encoder = LabelEncoder()
 y_encoded = label_encoder.fit_transform(y)  # Etiketleri sayılara dönüştür
@@ -44,9 +45,6 @@ summary_file = 'data/summaries.csv'
 bart_tokenizer = BartTokenizer.from_pretrained("facebook/bart-large-cnn")
 bart_model = BartForConditionalGeneration.from_pretrained("facebook/bart-large-cnn")
 
-# Hugging Face DistilGPT-2 modelini pipeline ile yükleme (metin genişletme için)
-text_generator = pipeline("text-generation", model="distilgpt2")
-
 # Kategoriler için özelleştirilmiş promptlar
 category_prompts = {
     'business': "Summarize the key points from contents related to business, including key trends in trade, companies, and economics.",
@@ -67,11 +65,6 @@ def summarize_text(text, prompt, max_length=350, min_length=150):
     summary = bart_tokenizer.decode(summary_ids[0], skip_special_tokens=True)
     return clean_redundancy(summary, prompt)
 
-def generate_text_expansion(text, max_length=1000):
-    expansion_prompt = f"Expand on the following article by adding more details and background information. Make the text more informative and engaging. {text}"
-    generated_text = text_generator(expansion_prompt, max_length=max_length, num_return_sequences=1)[0]['generated_text']
-    return clean_redundancy(generated_text, expansion_prompt)
-
 if not os.path.exists(summary_file):
     summaries = []
     for category in data_df['category'].unique():
@@ -86,7 +79,7 @@ else:
     summary_df = pd.read_csv(summary_file)
 
 # Streamlit başlığı
-st.title("News Article Categorization, Summarization, Generation")
+st.title("News Article Categorization and Summarization")
 
 # İki sütunlu düzen oluşturma
 col1, col2 = st.columns(2)
@@ -111,16 +104,6 @@ with col1:
             prompt = category_prompts.get(predicted_category)
             new_summary = summarize_text(user_input, prompt, max_length=40, min_length=25)
 
-            # Metni genişletme (DistilGPT-2 kullanarak)
-            expanded_text = generate_text_expansion(user_input, max_length=500)
-
-            # ROUGE ve BLEU metriklerini hesaplama
-            rouge = load("rouge")
-            bleu = load("bleu")
-
-            rouge_score = rouge.compute(predictions=[new_summary], references=[user_input])
-            bleu_score = bleu.compute(predictions=[new_summary], references=[[user_input]])
-
             # Model performansını hesaplama
             y_pred_lr = pipeline_lr.predict(X_test)
             accuracy = accuracy_score(y_test, y_pred_lr)
@@ -136,14 +119,6 @@ with col1:
                 st.write(f"**Recall**: {recall:.4f}")
                 st.write(f"**F1 Score**: {f1:.4f}")
 
-                st.write("### ROUGE Scores:")
-                st.write(f"**ROUGE-1**: {rouge_score['rouge1']}")
-                st.write(f"**ROUGE-2**: {rouge_score['rouge2']}")
-                st.write(f"**ROUGE-L**: {rouge_score['rougeL']}")
-
-                st.write("### BLEU Score:")
-                st.write(f"**BLEU**: {bleu_score['bleu']:.4f}")
-
             # Sağ sütunda tahmin ve sonuçları göster
             with col2:
                 st.write(f"### Predicted Category: {predicted_category}")
@@ -151,8 +126,5 @@ with col1:
                 st.write(new_summary)
                 st.write(f"### Summary of other news in {predicted_category} Category:")
                 st.write(existing_summary)
-                st.write(f"### Expanded Text:")
-                st.write(expanded_text)
         else:
             st.warning("Please enter a news article to proceed.")
-
