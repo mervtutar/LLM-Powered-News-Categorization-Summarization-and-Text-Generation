@@ -1,0 +1,13 @@
+streamlit
+pandas
+numpy
+nltk
+regex
+matplotlib
+textblob
+scikit-learn
+xgboost
+joblib
+transformers
+evaluate
+torch
