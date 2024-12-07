@@ -10,6 +10,8 @@ from transformers import BartTokenizer, BartForConditionalGeneration
 from evaluate import load
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.preprocessing import LabelEncoder
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Prevent TensorFlow/PyTorch from using GPU
 
 # Veri yükleme
 data_df = pd.read_csv('data/merged_data.csv')
