@@ -4,6 +4,7 @@ numpy
 nltk
 regex
 matplotlib
+seaborn
 textblob
 scikit-learn
 xgboost
