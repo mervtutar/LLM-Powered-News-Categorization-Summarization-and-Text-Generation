@@ -145,10 +145,12 @@ Expand on the given news content and mention its place in the industry, providin
 # LLM modelini kullanarak kategoriye uygun metin üretme
 generated_text = text_generator(prompt, max_length=250, truncation=True)
 generated_text_content = generated_text[0]['generated_text']
+
 # Sonuçları yazdırma
 print(f"Category: {predicted_category}")
 print(f"Category Explanation: {category_description}")
 # print(f"Generated Text: {generated_text[0]['generated_text']}")
+
 # Sonuçları yazdırma (promptu dışarıda tutarak)
 print(f"Generated Text: {generated_text[0]['generated_text']}")
 
