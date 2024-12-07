@@ -152,7 +152,6 @@ print(f"Category Explanation: {category_description}")
 # Sonuçları yazdırma (promptu dışarıda tutarak)
 print(f"Generated Text: {generated_text[0]['generated_text']}")
 
-
 # ROUGE ve BLEU metriklerini hesaplama
 rouge = load("rouge")
 bleu = load("bleu")
