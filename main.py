@@ -1,3 +1,8 @@
+###################################################################
+# Patika.dev & NewMind AI Bootcamp Bitirme Projesi
+###################################################################
+
+# Gerekli kütüphanelerin import edilmesi
 import streamlit as st
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -11,20 +16,26 @@ from transformers import BartTokenizer, BartForConditionalGeneration, pipeline
 from evaluate import load
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.preprocessing import LabelEncoder
-# Veri yükleme
-data_df = pd.read_csv('data/merged_data.csv')
 
+# Veriler
+data_df = pd.read_csv('data/merged_data.csv')
+summary_file = 'data/summary.csv' # kategorilere ait özetler
+model_file = 'classifier_model.joblib'
+
+#################################################################
+# Classification için Modelleme
+#################################################################
 # Eğitim ve test verisini ayırma
 X = data_df["cleaned content"]
 y = data_df["category"]
+
 # Label Encoding: Kategorik etiketleri sayısal hale getirme
 label_encoder = LabelEncoder()
 y_encoded = label_encoder.fit_transform(y)  # Etiketleri sayılara dönüştür
 
+# Eğitim ve test setleri
 X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
 
-# Model kaydedilme yolu
-model_file = 'classifier_model.joblib'
 
 # Modeli yükleme , eğitim yapma
 if os.path.exists(model_file):
@@ -37,8 +48,9 @@ else:
     pipeline_lr.fit(X_train, y_train)
     joblib.dump(pipeline_lr, model_file)
 
-# Özetlerin kaydedileceği dosya
-summary_file = 'data/summaries.csv'
+#################################################################
+# Özet çıkarma ve metin üretme
+#################################################################
 
 # Hugging Face BART modelini ve tokenizer'ını yükleme (özetleme için)
 bart_tokenizer = BartTokenizer.from_pretrained("facebook/bart-large-cnn")
@@ -72,10 +84,11 @@ def generate_text_expansion(text, max_length=1000): # Metin genişletme
     generated_text = text_generator(expansion_prompt, max_length=max_length, num_return_sequences=1)[0]['generated_text']
     return clean_redundancy(generated_text, expansion_prompt)
 
+# Her kategoriye ait var olan verileri özetleme ve summary.csv dosyasına kaydetme
 if not os.path.exists(summary_file):
     summaries = []
     for category in data_df['category'].unique():
-        category_data = data_df[data_df['category'] == category]["cleaned content"].tolist()
+        category_data = data_df[data_df['category'] == category]["content"].tolist()
         category_text = " ".join(category_data)
         prompt = category_prompts.get(category)
         summary = summarize_text(category_text, prompt)
@@ -85,6 +98,13 @@ if not os.path.exists(summary_file):
 else:
     summary_df = pd.read_csv(summary_file)
 
+
+#################################################################
+# STREAMLIT Arayüzü
+#################################################################
+
+st.set_page_config(layout="wide")
+
 # Streamlit başlığı
 st.title("News Article Categorization, Summarization, Generation")
 
@@ -93,7 +113,7 @@ col1, col2 = st.columns(2)
 
 with col1:
     # Kullanıcıdan giriş alma
-    user_input = st.text_area("Please enter a news article:")
+    user_input = st.text_area("Please enter a news article:",height=150)
 
     # Submit butonu
     if st.button('Submit'):
