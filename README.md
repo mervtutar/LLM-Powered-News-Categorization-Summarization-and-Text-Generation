@@ -1,5 +1,5 @@
 # New-Mind-AI-Bootcamp-Final-Case
-Patika.dev &amp; New Mind
+
 This project was developed as part of the Patika.dev & NewMind AI Bootcamp capstone. It focuses on leveraging machine learning and NLP models to analyze, categorize, summarize, and expand news articles efficiently.
 ## 🚀 Project Overview
 This project addresses the challenge of processing large volumes of news articles by providing a streamlined solution for:
