@@ -29,12 +29,9 @@ business.info()
 business.head()
 education = pd.read_csv('data/education_data.csv')
 
-
 entertainment = pd.read_csv('data/entertainment_data.csv')
 
-
 sports = pd.read_csv('data/sports_data.csv')
-
 
 technology = pd.read_csv('data/technology_data.csv')
 
@@ -58,7 +55,17 @@ data_df["content"].nunique()
 position = data_df['content'].value_counts()
 data_df['category'].value_counts() # veri düzgün dağılmış
 
-
+# Kategori dağılımını görselleştirelim
+category_counts = data_df['category'].value_counts()
+content_lengths = data_df['content'].apply(lambda x: len(str(x))).value_counts()
+plt.figure(figsize=(10, 5))
+category_counts.plot(kind='bar', color='skyblue')
+plt.title('Category Distribution')
+plt.xlabel('Category')
+plt.ylabel('Number of Articles')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
 ###################################################################
 # Ön İşleme
 
