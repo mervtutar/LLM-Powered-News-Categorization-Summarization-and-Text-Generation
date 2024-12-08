@@ -6,9 +6,29 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg')
+from warnings import filterwarnings
+from nltk.corpus import stopwords
+from nltk.sentiment import SentimentIntensityAnalyzer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_val_score, GridSearchCV, cross_validate
+from sklearn.preprocessing import LabelEncoder
+from textblob import Word, TextBlob
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+import nltk
+import re
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_colwidth', None)
 pd.set_option('display.width', 500)
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('punkt_tab')
+
+###################################################################
+# Veri analizi
+###################################################################
+
 def check_df(dataframe, head=5):
     print("##################### Shape #####################")
     print(dataframe.shape) # satır sütun sayısı
@@ -27,15 +47,24 @@ def check_df(dataframe, head=5):
 business = pd.read_csv('data/business_data.csv')
 business.info()
 business.head()
+
 education = pd.read_csv('data/education_data.csv')
+education.info()
+education.head()
 
 entertainment = pd.read_csv('data/entertainment_data.csv')
+entertainment.info()
+entertainment.head()
 
 sports = pd.read_csv('data/sports_data.csv')
+sports.info()
+sports.head()
 
 technology = pd.read_csv('data/technology_data.csv')
+technology.info()
+technology.head()
 
-# tüm verileri birleştir
+# Tüm verileri birleştir
 dfs=[business,education,entertainment,sports,technology]
 data_df = pd.concat(dfs)
 data_df= data_df.sample(frac = 1).reset_index(drop = True) # rastgele sırala
@@ -66,27 +95,10 @@ plt.ylabel('Number of Articles')
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
+
 ###################################################################
-# Ön İşleme
-
-from warnings import filterwarnings
-import numpy as np
-import pandas as pd
-from nltk.corpus import stopwords
-from nltk.sentiment import SentimentIntensityAnalyzer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_val_score, GridSearchCV, cross_validate
-from sklearn.preprocessing import LabelEncoder
-from textblob import Word, TextBlob
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
-import nltk
-import re
-
-nltk.download('stopwords')
-nltk.download('wordnet')
-nltk.download('punkt_tab')
+# NLP Ön İşleme
+###################################################################
 
 def preprocess_reviews(text):
 
@@ -97,14 +109,11 @@ def preprocess_reviews(text):
     text = re.sub(r'[^\w\s]', '', text) # noktalama işaretlerinin yerine boşluk getir
 
     # Numbers
-    text = re.sub(r'\d+', '', text)
+    text = re.sub(r'\d+', '', text) # sayıları çıkar
 
     # Stopwords -> dilde anlam taşımayan kelimeler
-    import nltk
-    # nltk.download('stopwords')
     sw = stopwords.words('english')
 
-    # metinlerde her satırı gezip stopwords varsa onları silmeliyiz ya da stopwords dışındakileri seçmeliyiz
     # öncelikle cümleleri boşluklara göre split edip list comp yapısıyla kelimelerin hepsini gezip stopwords olmayanları seçelim, seçtiklerimizi tekrar join ile birleştirelim
     text = " ".join(x for x in text.split() if x not in sw)
 
@@ -116,10 +125,10 @@ def preprocess_reviews(text):
     return text
 
 
-data_df["cleaned content"] = data_df["content"].apply(preprocess_reviews)
+data_df["cleaned content"] = data_df["content"].apply(preprocess_reviews) # veride "cleaned content" değişkeni oluşturuldu
 data_df.columns
 data_df['cleaned content'].head(10)
 data_df[['content','cleaned content']].head(10)
 
-data_df.to_csv('data/merged_data.csv', index=False)
+data_df.to_csv('data/merged_data.csv', index=False) # yeni veri kaydedildi
 
