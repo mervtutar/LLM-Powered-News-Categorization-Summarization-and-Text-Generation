@@ -45,16 +45,9 @@ streamlit run app.py
    - Summary of the article
    - Expanded version of the article
    - Category-specific summaries for other articles
+ ## Output
+![](output.jpg)
 
-## 📊 Performance Metrics
-
-### Classification:
-- Accuracy: XX%
-- F1-Score: XX%
-
-### Summarization:
-- ROUGE-1: XX
-- BLEU: XX
 
 ## 🛠️ Technologies Used
 - **Python**: Core programming language
