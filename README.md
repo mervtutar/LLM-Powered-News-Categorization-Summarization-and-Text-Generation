@@ -34,7 +34,7 @@ BART: facebook/bart-large-cnn
 DistilGPT-2: distilgpt2
 
 ### Run the Streamlit app:
-streamlit run app.py
+streamlit run main.py
 
 
 ## 🧪 How to Use
